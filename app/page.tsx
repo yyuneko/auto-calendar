@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 type ParseResponse = {
   event?: {
@@ -24,11 +24,43 @@ type ParseResponse = {
 
 export default function HomePage() {
   const [userId, setUserId] = useState('user_demo');
-  const [text, setText] = useState('下周三下午两点在瑞幸咖啡和老王开会一小时');
-  const [timezone, setTimezone] = useState('Asia/Shanghai');
+  const [text, setText] = useState('从今天开始，每三个月给猫咪做外驱，每个月给狗子内驱；今天晚上提醒我给妈妈打电话；下周二下午三点开会；每天下午两点吃药；每年八月八日是爸爸生日；每周五晚上八点和朋友吃饭');
+  const [timezone, setTimezone] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ParseResponse | null>(null);
   const [error, setError] = useState<string>('');
+
+  const timezoneOptions = useMemo(() => {
+    if (typeof Intl.supportedValuesOf === 'function') {
+      const timeZones = Intl.supportedValuesOf('timeZone');
+      if (timeZones.length > 0) {
+        return timeZones;
+      }
+    }
+
+    return [
+      'Asia/Shanghai',
+      'Asia/Tokyo',
+      'Asia/Singapore',
+      'Europe/London',
+      'Europe/Berlin',
+      'America/New_York',
+      'America/Los_Angeles',
+      'UTC',
+    ];
+  }, []);
+
+  useEffect(() => {
+    const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (systemTimeZone && timezoneOptions.includes(systemTimeZone)) {
+      setTimezone(systemTimeZone);
+      return;
+    }
+
+    if (systemTimeZone) {
+      setTimezone(systemTimeZone);
+    }
+  }, [timezoneOptions]);
 
   const subscriptionLink = useMemo(() => {
     if (!result?.subscriptionUrl) {
@@ -98,12 +130,17 @@ export default function HomePage() {
           <label>
             时区
             <br />
-            <input
-              type='text'
+            <select
               value={timezone}
               onChange={(event) => setTimezone(event.target.value)}
               required
-            />
+            >
+              {timezoneOptions.map((timeZoneItem) => (
+                <option key={timeZoneItem} value={timeZoneItem}>
+                  {timeZoneItem}
+                </option>
+              ))}
+            </select>
           </label>
         </p>
 

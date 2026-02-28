@@ -1,6 +1,10 @@
 import { kv } from '@vercel/kv';
 import { createToken } from '@/lib/id';
-import type { CalendarEvent, SubscriptionToken } from '@/lib/types';
+import type {
+	CalendarEvent,
+	EventUpdateInput,
+	SubscriptionToken,
+} from '@/lib/types';
 
 const EVENT_PREFIX = 'event:';
 const TOKEN_PREFIX = 'token:';
@@ -63,4 +67,66 @@ export async function resolveUserIdByToken(
 		`${TOKEN_PREFIX}${token}`
 	);
 	return tokenRecord?.userId ?? null;
+}
+
+export async function getEventById(
+	eventId: string
+): Promise<CalendarEvent | null> {
+	assertKvConfigured();
+	const event = await kv.get<CalendarEvent>(`${EVENT_PREFIX}${eventId}`);
+	return event ?? null;
+}
+
+export async function updateEventById(
+	userId: string,
+	eventId: string,
+	updates: EventUpdateInput
+): Promise<CalendarEvent | null> {
+	assertKvConfigured();
+	const existing = await getEventById(eventId);
+	if (!existing || existing.userId !== userId) {
+		return null;
+	}
+
+	const nextEvent: CalendarEvent = {
+		...existing,
+		id: existing.id,
+		userId: existing.userId,
+		createdAt: existing.createdAt,
+		updatedAt: new Date().toISOString(),
+	};
+
+	for (const [key, value] of Object.entries(updates) as Array<
+		[keyof EventUpdateInput, EventUpdateInput[keyof EventUpdateInput]]
+	>) {
+		if (value !== undefined) {
+			(nextEvent as Record<string, unknown>)[key] = value;
+			continue;
+		}
+
+		if (
+			key === 'rrule' &&
+			Object.prototype.hasOwnProperty.call(updates, 'rrule')
+		) {
+			delete (nextEvent as Record<string, unknown>).rrule;
+		}
+	}
+
+	await kv.set(`${EVENT_PREFIX}${eventId}`, nextEvent);
+	return nextEvent;
+}
+
+export async function deleteEventById(
+	userId: string,
+	eventId: string
+): Promise<boolean> {
+	assertKvConfigured();
+	const existing = await getEventById(eventId);
+	if (!existing || existing.userId !== userId) {
+		return false;
+	}
+
+	await kv.del(`${EVENT_PREFIX}${eventId}`);
+	await kv.srem(`${USER_EVENT_SET}${userId}`, eventId);
+	return true;
 }

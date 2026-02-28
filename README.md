@@ -6,7 +6,7 @@
 
 - 使用 Gemini 免费 API 解析自然语言。
 - 只保存结构化结果，不保存原始输入文本。
-- 不提供客户端直写事件接口（没有 `POST /events`）。
+- 仅提供一个写入口 `POST /api/parse`，由 AI 自动判断并执行新增/更新/删除（支持单次输入多条操作）。
 - 提供 token 订阅地址：`GET /api/calendar/:token.ics`。
 - 支持 `RRULE` 与全天事件。
 - ICS 头部包含 `X-PUBLISHED-TTL: PT15M`，时区统一 `Asia/Shanghai`。
@@ -14,7 +14,7 @@
 
 ## API 说明
 
-### 1) 解析并入库（结构化）
+### 1) 自然语言操作（日程增删改）
 
 `POST /api/parse`
 
@@ -45,10 +45,19 @@
 		"createdAt": "...",
 		"updatedAt": "..."
 	},
+	"action": "create",
+	"deletedEventId": null,
 	"token": "subscription_token",
 	"subscriptionUrl": "/api/calendar/subscription_token.ics"
 }
 ```
+
+说明：
+
+- 当输入语义是“新增”时，`action=create`，返回 `event`。
+- 当输入语义是“修改”时，`action=update`，返回修改后的 `event`。
+- 当输入语义是“删除”时，`action=delete`，返回 `deletedEventId`。
+- 当输入包含多条操作时，响应会包含 `results` 数组与 `summary` 汇总（成功/失败数量）。
 
 ### 2) 订阅链接
 

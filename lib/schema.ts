@@ -17,3 +17,13 @@ export const parsedEventSchema = z.object({
 	isAllDay: z.boolean().optional().default(false),
 	rrule: z.string().trim().optional(),
 });
+
+export const aiCalendarOperationSchema = z.object({
+	action: z.enum(['create', 'update', 'delete']),
+	targetEventId: z.string().optional(),
+	event: parsedEventSchema.partial().optional(),
+});
+
+export const aiCalendarOperationBatchSchema = z.object({
+	operations: z.array(aiCalendarOperationSchema).min(1).max(20),
+});

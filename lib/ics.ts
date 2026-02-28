@@ -4,7 +4,7 @@ import type { CalendarEvent } from '@/lib/types';
 const TZ = 'Asia/Shanghai';
 
 function normalizeText(value: string): string {
-	return value.trim().replace(/\s+/g, ' ');
+	return value?.trim().replace(/\s+/g, ' ');
 }
 
 function normalizeRrule(value: string | undefined): string | undefined {
