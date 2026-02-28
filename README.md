@@ -93,7 +93,7 @@ npm run dev
 
 点击部署按钮：
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/<your-org>/<your-repo>)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yyuneko/auto-calendar)
 
 部署时配置环境变量：
 
