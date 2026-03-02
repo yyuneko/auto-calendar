@@ -146,10 +146,11 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const { geminiApiKey, text, timezone } = parsedRequest.data;
+		const { geminiApiKey, locale, text, timezone } = parsedRequest.data;
 		const existingEvents = await getEventsByUserId(userId);
 		const aiBatch = await parseNaturalLanguageToOperations(
 			geminiApiKey,
+			locale,
 			text,
 			timezone,
 			existingEvents

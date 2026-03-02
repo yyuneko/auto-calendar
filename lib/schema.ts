@@ -4,6 +4,7 @@ const isoDateTime = z.string().datetime({ offset: true });
 
 export const parseRequestSchema = z.object({
 	geminiApiKey: z.string().min(1).max(200),
+	locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
 	text: z.string().min(1).max(2000),
 	timezone: z.string().min(1).max(80).default('Asia/Shanghai'),
 });

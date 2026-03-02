@@ -5,7 +5,18 @@ import zodToJsonSchema from 'zod-to-json-schema';
 
 const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
 
+type Locale = 'zh-CN' | 'en-US';
+
+function getLanguageInstruction(locale: Locale): string {
+	if (locale === 'en-US') {
+		return 'event.summary、event.location、event.description 必须使用英文输出。';
+	}
+
+	return 'event.summary、event.location、event.description 必须使用简体中文输出。';
+}
+
 function buildPrompt(
+	locale: Locale,
 	text: string,
 	timezone: string,
 	existingEvents: CalendarEvent[]
@@ -40,6 +51,7 @@ function buildPrompt(
 		'5) 若是 delete，不需要 event 字段',
 		'6) startTime/endTime 必须是 ISO 8601 且包含时区偏移，正确处理相对日期',
 		'7) 全天事件 isAllDay=true，必要时提供 rrule（例如 FREQ=WEEKLY;BYDAY=MO,WE）',
+		`8) ${getLanguageInstruction(locale)}`,
 		'已有事件列表（供 update/delete 选择目标）:',
 		eventContext || '(空)',
 		'用户输入:',
@@ -101,6 +113,7 @@ function isInvalidArgumentError(error: unknown): boolean {
 
 export async function parseNaturalLanguageToOperations(
 	geminiApiKey: string,
+	locale: Locale,
 	text: string,
 	timezone: string,
 	existingEvents: CalendarEvent[]
@@ -111,7 +124,7 @@ export async function parseNaturalLanguageToOperations(
 	}
 
 	const client = new GoogleGenAI({ apiKey });
-	const contents = buildPrompt(text, timezone, existingEvents);
+	const contents = buildPrompt(locale, text, timezone, existingEvents);
 
 	let response: unknown;
 	try {
