@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createId } from '@/lib/id';
 import { parseNaturalLanguageToOperations } from '@/lib/gemini';
 import { parseRequestSchema } from '@/lib/schema';
+import { getSessionUserId } from '@/lib/auth';
 import {
 	deleteEventById,
 	getEventsByUserId,
@@ -134,9 +135,21 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const { userId, text, timezone } = parsedRequest.data;
+		const userId = await getSessionUserId();
+		if (!userId) {
+			return NextResponse.json(
+				{
+					error: 'Unauthorized.',
+					message: 'Please sign in before parsing schedules.',
+				},
+				{ status: 401 }
+			);
+		}
+
+		const { geminiApiKey, text, timezone } = parsedRequest.data;
 		const existingEvents = await getEventsByUserId(userId);
 		const aiBatch = await parseNaturalLanguageToOperations(
+			geminiApiKey,
 			text,
 			timezone,
 			existingEvents

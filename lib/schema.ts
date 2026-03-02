@@ -3,7 +3,7 @@ import { z } from 'zod';
 const isoDateTime = z.string().datetime({ offset: true });
 
 export const parseRequestSchema = z.object({
-	userId: z.string().min(1).max(120),
+	geminiApiKey: z.string().min(1).max(200),
 	text: z.string().min(1).max(2000),
 	timezone: z.string().min(1).max(80).default('Asia/Shanghai'),
 });

@@ -22,11 +22,17 @@
 
 ```json
 {
-	"userId": "user_001",
+	"geminiApiKey": "AIzaSy...",
 	"text": "下周三下午两点在瑞幸咖啡和老王开会一小时",
 	"timezone": "Asia/Shanghai"
 }
 ```
+
+说明：
+
+- `POST /api/parse` 需要先登录。
+- 不再信任客户端传入 `userId`，用户身份由服务端会话决定。
+- `geminiApiKey` 由用户在页面输入并保存在浏览器本地（localStorage）。
 
 响应：
 
@@ -87,8 +93,11 @@ npm install
 
 复制 `.env.example` 为 `.env.local`，至少填写：
 
-- `GEMINI_API_KEY`
 - `GEMINI_MODEL`（默认 `gemini-2.0-flash`）
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
+- `AUTH_EMAIL_SERVER` / `AUTH_EMAIL_FROM`（邮箱魔法链接可选）
 - `KV_REST_API_URL`
 - `KV_REST_API_TOKEN`
 
@@ -106,8 +115,11 @@ npm run dev
 
 部署时配置环境变量：
 
-- `GEMINI_API_KEY`
 - `GEMINI_MODEL`（可选）
+- `NEXTAUTH_SECRET`（必填）
+- `NEXTAUTH_URL`（建议填写正式域名）
+- `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`（至少配置一组登录 Provider）
+- `AUTH_EMAIL_SERVER` / `AUTH_EMAIL_FROM`（可选）
 - `KV_REST_API_URL`（必填）
 - `KV_REST_API_TOKEN`（必填）
 

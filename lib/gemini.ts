@@ -100,13 +100,14 @@ function isInvalidArgumentError(error: unknown): boolean {
 }
 
 export async function parseNaturalLanguageToOperations(
+	geminiApiKey: string,
 	text: string,
 	timezone: string,
 	existingEvents: CalendarEvent[]
 ): Promise<AICalendarOperationBatch> {
-	const apiKey = process.env.GEMINI_API_KEY;
+	const apiKey = geminiApiKey.trim();
 	if (!apiKey) {
-		throw new Error('GEMINI_API_KEY is not configured.');
+		throw new Error('Gemini API key is required.');
 	}
 
 	const client = new GoogleGenAI({ apiKey });
